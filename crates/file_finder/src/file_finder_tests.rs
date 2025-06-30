@@ -1867,11 +1867,11 @@ async fn test_history_items_vs_very_good_external_match(cx: &mut gpui::TestAppCo
         .insert_tree(
             path!("/src"),
             json!({
-                "collab_ui": {
+                "test_module": {
                     "first.rs": "// First Rust file",
                     "second.rs": "// Second Rust file",
                     "third.rs": "// Third Rust file",
-                    "collab_ui.rs": "// Fourth Rust file",
+                    "test_module.rs": "// Fourth Rust file",
                 }
             }),
         )
@@ -1886,17 +1886,17 @@ async fn test_history_items_vs_very_good_external_match(cx: &mut gpui::TestAppCo
     open_close_queried_buffer("sec", 1, "second.rs", &workspace, cx).await;
 
     let finder = open_file_picker(&workspace, cx);
-    let query = "collab_ui";
+    let query = "test_module";
     cx.simulate_input(query);
     finder.update(cx, |picker, _| {
             let search_entries = collect_search_matches(picker).search_paths_only();
             assert_eq!(
                 search_entries,
                 vec![
-                    PathBuf::from("collab_ui/collab_ui.rs"),
-                    PathBuf::from("collab_ui/first.rs"),
-                    PathBuf::from("collab_ui/third.rs"),
-                    PathBuf::from("collab_ui/second.rs"),
+                    PathBuf::from("test_module/test_module.rs"),
+                    PathBuf::from("test_module/first.rs"),
+                    PathBuf::from("test_module/third.rs"),
+                    PathBuf::from("test_module/second.rs"),
                 ],
                 "Despite all search results having the same directory name, the most matching one should be on top"
             );

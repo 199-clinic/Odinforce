@@ -2999,7 +2999,6 @@ dependencies = [
  "chrono",
  "client",
  "clock",
- "collab_ui",
  "collections",
  "command_palette_hooks",
  "context_server",
@@ -3085,52 +3084,6 @@ dependencies = [
  "worktree",
  "zed_llm_client",
  "zlog",
-]
-
-[[package]]
-name = "collab_ui"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "call",
- "channel",
- "chrono",
- "client",
- "collections",
- "db",
- "editor",
- "emojis",
- "futures 0.3.31",
- "fuzzy",
- "gpui",
- "http_client",
- "language",
- "log",
- "menu",
- "notifications",
- "picker",
- "pretty_assertions",
- "project",
- "release_channel",
- "rich_text",
- "rpc",
- "schemars",
- "serde",
- "serde_derive",
- "serde_json",
- "settings",
- "smallvec",
- "story",
- "telemetry",
- "theme",
- "time",
- "time_format",
- "title_bar",
- "tree-sitter-md",
- "ui",
- "util",
- "workspace",
- "workspace-hack",
 ]
 
 [[package]]
@@ -15197,7 +15150,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "collab_ui",
  "ctrlc",
  "dialoguer",
  "editor",
@@ -16232,7 +16184,6 @@ name = "title_bar"
 version = "0.1.0"
 dependencies = [
  "auto_update",
- "call",
  "chrono",
  "client",
  "collections",
@@ -19886,7 +19837,6 @@ dependencies = [
  "clap",
  "cli",
  "client",
- "collab_ui",
  "collections",
  "command_palette",
  "component",

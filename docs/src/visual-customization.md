@@ -91,10 +91,7 @@ To disable this behavior use:
   // Individual status bar icons can be hidden:
   // "project_panel": {"button": false },
   // "outline_panel": {"button": false },
-  // "collaboration_panel": {"button": false },
-  // "chat_panel": {"button": "never" },
   // "git_panel": {"button": false },
-  // "notification_panel": {"button": false },
   // "agent": {"button": false },
   // "debugger": {"button": false },
   // "diagnostics": {"button": false },
@@ -506,32 +503,3 @@ See [Terminal settings](./configuring-zed.md#terminal) for additional non-visual
   }
 ```
 
-## Collaboration Panels
-
-```json
-{
-  // Collaboration Panel
-  "collaboration_panel": {
-    "button": true,               // Show/hide status bar icon
-    "dock": "left",               // Where to dock: left, right
-    "default_width": 240          // Default width of the collaboration panel.
-  },
-  "show_call_status_icon": true,  // Shown call status in the OS status bar.
-
-  // Chat Panel
-  "chat_panel": {
-    "button": "when_in_call",     // status bar icon (true, false, when_in_call)
-    "dock": "right",              // Where to dock: left, right
-    "default_width": 240          // Default width of the chat panel
-  },
-
-  // Notification Panel
-  "notification_panel": {
-    // Whether to show the notification panel button in the status bar.
-    "button": true,
-    // Where to dock the notification panel. Can be 'left' or 'right'.
-    "dock": "right",
-    // Default width of the notification panel.
-    "default_width": 380
-  }
-```

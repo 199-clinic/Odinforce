@@ -13,7 +13,6 @@ use client::{
     proto::PeerId,
 };
 use clock::FakeSystemClock;
-use collab_ui::channel_view::ChannelView;
 use collections::{HashMap, HashSet};
 
 use fs::FakeFs;
@@ -306,7 +305,6 @@ impl TestServer {
             call::init(client.clone(), user_store.clone(), cx);
             channel::init(&client, user_store.clone(), cx);
             notifications::init(client.clone(), user_store, cx);
-            collab_ui::init(&app_state, cx);
             file_finder::init(cx);
             menu::init();
             cx.bind_keys(
@@ -862,16 +860,6 @@ impl TestClient {
         // it might be nice to try and cleanup these at the end of each test.
         (entity, cx)
     }
-}
-
-pub fn open_channel_notes(
-    channel_id: ChannelId,
-    cx: &mut VisualTestContext,
-) -> Task<anyhow::Result<Entity<ChannelView>>> {
-    let window = cx.update(|_, cx| cx.active_window().unwrap().downcast::<Workspace>().unwrap());
-    let entity = window.root(cx).unwrap();
-
-    cx.update(|window, cx| ChannelView::open(channel_id, None, entity.clone(), window, cx))
 }
 
 impl Drop for TestClient {

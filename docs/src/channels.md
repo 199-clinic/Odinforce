@@ -13,7 +13,6 @@ Channels provide a way to streamline collaborating for software engineers in man
 
 ## Channels
 
-To open the collaboration panel hit {#kb collab_panel::ToggleFocus} or `collab panel: toggle focus`.
 
 Each channel corresponds to an ongoing project or work-stream. You can see who’s in a channel as their avatars will show up in the sidebar. This makes it easy to see what everyone is doing and where to find them if needed.
 
