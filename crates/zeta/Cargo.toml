@@ -77,5 +77,4 @@ tree-sitter-rust.workspace = true
 unindent.workspace = true
 workspace = { workspace = true, features = ["test-support"] }
 worktree = { workspace = true, features = ["test-support"] }
-call = { workspace = true, features = ["test-support"] }
 zlog.workspace = true

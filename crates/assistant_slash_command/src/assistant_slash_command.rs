@@ -1,8 +1,6 @@
-mod extension_slash_command;
 mod slash_command_registry;
 mod slash_command_working_set;
 
-pub use crate::extension_slash_command::*;
 pub use crate::slash_command_registry::*;
 pub use crate::slash_command_working_set::*;
 use anyhow::Result;
@@ -22,7 +20,6 @@ use workspace::{Workspace, ui::IconName};
 
 pub fn init(cx: &mut App) {
     SlashCommandRegistry::default_global(cx);
-    extension_slash_command::init(cx);
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

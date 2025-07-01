@@ -8,7 +8,6 @@ use client::{Client, UserStore};
 use clock::FakeSystemClock;
 use language_model::{LanguageModelRequest, fake_provider::FakeLanguageModel};
 
-use extension::ExtensionHostProxy;
 use fs::{FakeFs, Fs};
 use gpui::{AppContext as _, Entity, SemanticVersion, TestAppContext};
 use http_client::{BlockedHttpClient, FakeHttpClient};
@@ -1777,7 +1776,6 @@ pub async fn init_test(
     let http_client = Arc::new(BlockedHttpClient);
     let node_runtime = NodeRuntime::unavailable();
     let languages = Arc::new(LanguageRegistry::new(cx.executor()));
-    let proxy = Arc::new(ExtensionHostProxy::new());
     server_cx.update(HeadlessProject::init);
     let headless = server_cx.new(|cx| {
         client::init_settings(cx);
@@ -1789,7 +1787,6 @@ pub async fn init_test(
                 http_client,
                 node_runtime,
                 languages,
-                extension_host_proxy: proxy,
             },
             cx,
         )

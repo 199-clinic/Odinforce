@@ -1,6 +1,5 @@
 use auto_update::{AutoUpdateStatus, AutoUpdater, DismissErrorMessage, VersionCheckType};
 use editor::Editor;
-use extension_host::ExtensionStore;
 use futures::StreamExt;
 use gpui::{
     Animation, AnimationExt as _, App, Context, CursorStyle, Entity, EventEmitter,
@@ -651,24 +650,6 @@ impl ActivityIndicator {
             };
         }
 
-        if let Some(extension_store) =
-            ExtensionStore::try_global(cx).map(|extension_store| extension_store.read(cx))
-        {
-            if let Some(extension_id) = extension_store.outstanding_operations().keys().next() {
-                return Some(Content {
-                    icon: Some(
-                        Icon::new(IconName::Download)
-                            .size(IconSize::Small)
-                            .into_any_element(),
-                    ),
-                    message: format!("Updating {extension_id} extension…"),
-                    on_click: Some(Arc::new(|this, window, cx| {
-                        this.dismiss_error_message(&DismissErrorMessage, window, cx)
-                    })),
-                    tooltip_message: None,
-                });
-            }
-        }
 
         None
     }

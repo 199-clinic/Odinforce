@@ -14,7 +14,6 @@ use ::fs::RealFs;
 use clap::Parser;
 use client::{Client, ProxySettings, UserStore};
 use collections::{HashMap, HashSet};
-use extension::ExtensionHostProxy;
 use futures::future;
 use gpui::http_client::read_proxy_from_env;
 use gpui::{App, AppContext, Application, AsyncApp, Entity, SemanticVersion, UpdateGlobal};
@@ -411,11 +410,7 @@ pub fn init(cx: &mut App) -> Arc<AgentAppState> {
     .detach();
     let node_runtime = NodeRuntime::new(client.http_client(), None, rx);
 
-    let extension_host_proxy = ExtensionHostProxy::global(cx);
-
     language::init(cx);
-    debug_adapter_extension::init(extension_host_proxy.clone(), cx);
-    language_extension::init(extension_host_proxy.clone(), languages.clone());
     language_model::init(client.clone(), cx);
     language_models::init(user_store.clone(), client.clone(), fs.clone(), cx);
     languages::init(languages.clone(), node_runtime.clone(), cx);

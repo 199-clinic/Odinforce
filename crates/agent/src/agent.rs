@@ -7,7 +7,6 @@ mod agent_profile;
 mod buffer_codegen;
 mod context;
 mod context_picker;
-mod context_server_configuration;
 mod context_server_tool;
 mod context_store;
 mod context_strip;
@@ -162,7 +161,6 @@ pub fn init(
     assistant_slash_command::init(cx);
     thread_store::init(cx);
     agent_panel::init(cx);
-    context_server_configuration::init(language_registry.clone(), fs.clone(), cx);
 
     register_slash_commands(cx);
     inline_assistant::init(

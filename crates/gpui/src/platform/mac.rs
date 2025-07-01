@@ -5,7 +5,7 @@ mod display;
 mod display_link;
 mod events;
 mod keyboard;
-mod screen_capture;
+// mod screen_capture; // Removed with call functionality
 
 #[cfg(not(feature = "macos-blade"))]
 mod metal_atlas;

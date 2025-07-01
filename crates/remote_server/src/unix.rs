@@ -4,7 +4,6 @@ use anyhow::{Context as _, Result, anyhow};
 use chrono::Utc;
 use client::{ProxySettings, telemetry};
 
-use extension::ExtensionHostProxy;
 use fs::{Fs, RealFs};
 use futures::channel::mpsc;
 use futures::{AsyncRead, AsyncWrite, AsyncWriteExt, FutureExt, SinkExt, select, select_biased};
@@ -442,8 +441,6 @@ pub fn execute_run(
         git_hosting_providers::init(cx);
         dap_adapters::init(cx);
 
-        extension::init(cx);
-        let extension_host_proxy = ExtensionHostProxy::global(cx);
 
         let project = cx.new(|cx| {
             let fs = Arc::new(RealFs::new(None, cx.background_executor().clone()));
@@ -480,7 +477,6 @@ pub fn execute_run(
                     http_client,
                     node_runtime,
                     languages,
-                    extension_host_proxy,
                 },
                 cx,
             )

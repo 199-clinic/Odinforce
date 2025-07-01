@@ -2,7 +2,7 @@ use super::{
     BoolExt, MacKeyboardLayout,
     attributed_string::{NSAttributedString, NSMutableAttributedString},
     events::key_to_native,
-    is_macos_version_at_least, renderer, screen_capture,
+    is_macos_version_at_least, renderer,
 };
 use crate::{
     Action, AnyWindowHandle, BackgroundExecutor, ClipboardEntry, ClipboardItem, ClipboardString,
@@ -580,7 +580,10 @@ impl Platform for MacPlatform {
     fn screen_capture_sources(
         &self,
     ) -> oneshot::Receiver<Result<Vec<Box<dyn ScreenCaptureSource>>>> {
-        screen_capture::get_sources()
+        // Screen capture removed with call functionality
+        let (tx, rx) = oneshot::channel();
+        let _ = tx.send(Ok(Vec::new()));
+        rx
     }
 
     fn active_window(&self) -> Option<AnyWindowHandle> {

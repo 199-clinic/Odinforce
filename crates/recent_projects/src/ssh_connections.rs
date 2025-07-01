@@ -4,7 +4,6 @@ use std::{path::PathBuf, sync::Arc, time::Duration};
 use anyhow::{Context as _, Result};
 use auto_update::AutoUpdater;
 use editor::Editor;
-use extension_host::ExtensionStore;
 use futures::channel::oneshot;
 use gpui::{
     Animation, AnimationExt, AnyWindowHandle, App, AsyncApp, DismissEvent, Entity, EventEmitter,
@@ -679,14 +678,7 @@ pub async fn open_ssh_project(
             }
         }
 
-        window
-            .update(cx, |workspace, _, cx| {
-                if let Some(client) = workspace.project().read(cx).ssh_client().clone() {
-                    ExtensionStore::global(cx)
-                        .update(cx, |store, cx| store.register_ssh_client(client, cx));
-                }
-            })
-            .ok();
+        // Extension store registration removed
 
         break;
     }

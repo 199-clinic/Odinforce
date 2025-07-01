@@ -8,8 +8,6 @@ use client::{Client, ProxySettings, UserStore, parse_zed_link};
 use collections::HashMap;
 use db::kvp::{GLOBAL_KEY_VALUE_STORE, KEY_VALUE_STORE};
 use editor::Editor;
-use extension::ExtensionHostProxy;
-use extension_host::ExtensionStore;
 use fs::{Fs, RealFs};
 use futures::{StreamExt, channel::oneshot};
 use git::GitHostingProviderRegistry;
@@ -163,15 +161,6 @@ pub fn main() {
     #[cfg(unix)]
     util::prevent_root_execution();
 
-    // Check if there is a pending installer
-    // If there is, run the installer and exit
-    // And we don't want to run the installer if we are not the first instance
-    #[cfg(target_os = "windows")]
-    let is_first_instance = crate::zed::windows_only_instance::is_first_instance();
-    #[cfg(target_os = "windows")]
-    if is_first_instance && auto_update::check_pending_installation() {
-        return;
-    }
 
     let args = Args::parse();
 
@@ -400,9 +389,6 @@ pub fn main() {
 
         OpenListener::set_global(cx, open_listener.clone());
 
-        extension::init(cx);
-        let extension_host_proxy = ExtensionHostProxy::global(cx);
-
         let client = Client::production(cx);
         cx.set_http_client(client.http_client());
         let mut languages = LanguageRegistry::new(cx.background_executor().clone());
@@ -435,9 +421,7 @@ pub fn main() {
         .detach();
         let node_runtime = NodeRuntime::new(client.http_client(), Some(shell_env_loaded_rx), rx);
 
-        debug_adapter_extension::init(extension_host_proxy.clone(), cx);
         language::init(cx);
-        language_extension::init(extension_host_proxy.clone(), languages.clone());
         languages::init(languages.clone(), node_runtime.clone(), cx);
         let user_store = cx.new(|cx| UserStore::new(client.clone(), cx));
         let workspace_store = cx.new(|cx| WorkspaceStore::new(client.clone(), cx));
@@ -486,9 +470,7 @@ pub fn main() {
         });
         AppState::set_global(Arc::downgrade(&app_state), cx);
 
-        auto_update::init(client.http_client(), cx);
         dap_adapters::init(cx);
-        auto_update_ui::init(cx);
         reliability::init(
             client.http_client(),
             system_id.as_ref().map(|id| id.to_string()),
@@ -499,11 +481,6 @@ pub fn main() {
 
         SystemAppearance::init(cx);
         theme::init(theme::LoadThemes::All(Box::new(Assets)), cx);
-        theme_extension::init(
-            extension_host_proxy.clone(),
-            ThemeRegistry::global(cx),
-            cx.background_executor().clone(),
-        );
         command_palette::init(cx);
         let copilot_language_server_id = app_state.languages.next_language_server_id();
         copilot::init(
@@ -540,13 +517,6 @@ pub fn main() {
         );
         assistant_tools::init(app_state.client.http_client(), cx);
         repl::init(app_state.fs.clone(), cx);
-        extension_host::init(
-            extension_host_proxy,
-            app_state.fs.clone(),
-            app_state.client.clone(),
-            app_state.node_runtime.clone(),
-            cx,
-        );
         recent_projects::init(cx);
 
         load_embedded_fonts(cx);
@@ -570,7 +540,6 @@ pub fn main() {
         outline_panel::init(cx);
         tasks_ui::init(cx);
         snippets_ui::init(cx);
-        channel::init(&app_state.client.clone(), app_state.user_store.clone(), cx);
         search::init(cx);
         vim::init(cx);
         terminal_view::init(cx);
@@ -579,7 +548,6 @@ pub fn main() {
         toolchain_selector::init(cx);
         theme_selector::init(cx);
         language_tools::init(cx);
-        call::init(app_state.client.clone(), app_state.user_store.clone(), cx);
         notifications::init(app_state.client.clone(), app_state.user_store.clone(), cx);
         git_ui::init(cx);
         jj_ui::init(cx);
@@ -587,7 +555,6 @@ pub fn main() {
         markdown_preview::init(cx);
         welcome::init(cx);
         settings_ui::init(cx);
-        extensions_ui::init(cx);
         zeta::init(cx);
         inspector_ui::init(app_state.clone(), cx);
 
@@ -605,8 +572,6 @@ pub fn main() {
                         })
                         .ok();
                 }
-
-                eager_load_active_theme_and_icon_theme(fs.clone(), cx);
 
                 languages.set_theme(cx.theme().clone());
                 let new_host = &client::ClientSettings::get_global(cx).server_url;
@@ -1081,65 +1046,6 @@ fn load_embedded_fonts(cx: &App) {
         .unwrap();
 }
 
-/// Eagerly loads the active theme and icon theme based on the selections in the
-/// theme settings.
-///
-/// This fast path exists to load these themes as soon as possible so the user
-/// doesn't see the default themes while waiting on extensions to load.
-fn eager_load_active_theme_and_icon_theme(fs: Arc<dyn Fs>, cx: &App) {
-    let extension_store = ExtensionStore::global(cx);
-    let theme_registry = ThemeRegistry::global(cx);
-    let theme_settings = ThemeSettings::get_global(cx);
-    let appearance = SystemAppearance::global(cx).0;
-
-    if let Some(theme_selection) = theme_settings.theme_selection.as_ref() {
-        let theme_name = theme_selection.theme(appearance);
-        if matches!(theme_registry.get(theme_name), Err(ThemeNotFoundError(_))) {
-            if let Some(theme_path) = extension_store.read(cx).path_to_extension_theme(theme_name) {
-                cx.spawn({
-                    let theme_registry = theme_registry.clone();
-                    let fs = fs.clone();
-                    async move |cx| {
-                        theme_registry.load_user_theme(&theme_path, fs).await?;
-
-                        cx.update(|cx| {
-                            ThemeSettings::reload_current_theme(cx);
-                        })
-                    }
-                })
-                .detach_and_log_err(cx);
-            }
-        }
-    }
-
-    if let Some(icon_theme_selection) = theme_settings.icon_theme_selection.as_ref() {
-        let icon_theme_name = icon_theme_selection.icon_theme(appearance);
-        if matches!(
-            theme_registry.get_icon_theme(icon_theme_name),
-            Err(IconThemeNotFoundError(_))
-        ) {
-            if let Some((icon_theme_path, icons_root_path)) = extension_store
-                .read(cx)
-                .path_to_extension_icon_theme(icon_theme_name)
-            {
-                cx.spawn({
-                    let theme_registry = theme_registry.clone();
-                    let fs = fs.clone();
-                    async move |cx| {
-                        theme_registry
-                            .load_icon_theme(&icon_theme_path, &icons_root_path, fs)
-                            .await?;
-
-                        cx.update(|cx| {
-                            ThemeSettings::reload_current_icon_theme(cx);
-                        })
-                    }
-                })
-                .detach_and_log_err(cx);
-            }
-        }
-    }
-}
 
 /// Spawns a background task to load the user themes from the themes directory.
 fn load_user_themes_in_background(fs: Arc<dyn fs::Fs>, cx: &mut App) {

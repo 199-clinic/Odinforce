@@ -59,7 +59,7 @@ use crate::platform::{
         reveal_path_internal,
         xdg_desktop_portal::{Event as XDPEvent, XDPEventSource},
     },
-    scap_screen_capture::scap_screen_sources,
+    // scap_screen_capture::scap_screen_sources, // Removed with call functionality
 };
 use crate::{
     AnyWindowHandle, Bounds, ClipboardItem, CursorStyle, DisplayId, FileDropEvent, Keystroke,
@@ -1484,7 +1484,10 @@ impl LinuxClient for X11Client {
     fn screen_capture_sources(
         &self,
     ) -> oneshot::Receiver<anyhow::Result<Vec<Box<dyn ScreenCaptureSource>>>> {
-        scap_screen_sources(&self.0.borrow().common.foreground_executor)
+        // Screen capture removed with call functionality
+        let (tx, rx) = oneshot::channel();
+        let _ = tx.send(Ok(Vec::new()));
+        rx
     }
 
     fn open_window(

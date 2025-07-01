@@ -2366,16 +2366,6 @@ Examples:
 - Searching for "function" would match "function", "Function", "FUNCTION", etc.
 - Searching for "Function" would only match "Function", not "function" or "FUNCTION"
 
-## Show Call Status Icon
-
-- Description: Whether or not to show the call status icon in the status bar.
-- Setting: `show_call_status_icon`
-- Default: `true`
-
-**Options**
-
-`boolean` values
-
 ## Completions
 
 - Description: Controls how completions are processed for this language.
@@ -3355,21 +3345,6 @@ Run the `theme selector: toggle` action in the command palette to see a current 
     "show": null
   }
 }
-```
-
-## Calls
-
-- Description: Customize behavior when participating in a call
-- Setting: `calls`
-- Default:
-
-```json
-"calls": {
-  // Join calls with the microphone live by default
-  "mute_on_join": false,
-  // Share your project when you are the first to join a channel
-  "share_on_join": false
-},
 ```
 
 ## Unnecessary Code Fade

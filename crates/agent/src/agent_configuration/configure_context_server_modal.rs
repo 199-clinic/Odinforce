@@ -38,7 +38,7 @@ enum ConfigurationTarget {
     Extension {
         id: ContextServerId,
         repository_url: Option<SharedString>,
-        installation: Option<extension::ContextServerConfiguration>,
+        installation: Option<context_server::ContextServerConfiguration>,
     },
 }
 
@@ -222,7 +222,7 @@ fn resolve_context_server_extension(
         return Task::ready(None);
     };
 
-    let extension = crate::agent_configuration::resolve_extension_for_context_server(&id, cx);
+    let _extension = crate::agent_configuration::resolve_extension_for_context_server(&id, cx);
     cx.spawn(async move |cx| {
         let installation = descriptor
             .configuration(worktree_store, cx)
@@ -233,8 +233,7 @@ fn resolve_context_server_extension(
 
         Some(ConfigurationTarget::Extension {
             id,
-            repository_url: extension
-                .and_then(|(_, manifest)| manifest.repository.clone().map(SharedString::from)),
+            repository_url: None,
             installation,
         })
     })

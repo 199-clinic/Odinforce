@@ -8,8 +8,6 @@ use agent_settings::AgentSettings;
 use assistant_tool::{ToolSource, ToolWorkingSet};
 use collections::HashMap;
 use context_server::ContextServerId;
-use extension::ExtensionManifest;
-use extension_host::ExtensionStore;
 use fs::Fs;
 use gpui::{
     Action, Animation, AnimationExt as _, AnyView, App, Corner, Entity, EventEmitter, FocusHandle,
@@ -29,7 +27,6 @@ use ui::{
 };
 use util::ResultExt as _;
 use workspace::Workspace;
-use zed_actions::ExtensionCategoryFilter;
 
 pub(crate) use configure_context_server_modal::ConfigureContextServerModal;
 pub(crate) use manage_profiles_modal::ManageProfilesModal;
@@ -457,16 +454,8 @@ impl AgentConfiguration {
                             .icon(IconName::Hammer)
                             .icon_size(IconSize::Small)
                             .icon_position(IconPosition::Start)
-                            .on_click(|_event, window, cx| {
-                                window.dispatch_action(
-                                    zed_actions::Extensions {
-                                        category_filter: Some(
-                                            ExtensionCategoryFilter::ContextServers,
-                                        ),
-                                    }
-                                    .boxed_clone(),
-                                    cx,
-                                )
+                            .on_click(|_event, _window, _cx| {
+                                // Extensions removed
                             }),
                         ),
                     ),
@@ -524,7 +513,7 @@ impl AgentConfiguration {
 
         let (source_icon, source_tooltip) = if is_from_extension {
             (
-                IconName::ZedMcpExtension,
+                IconName::ZedMcpCustom,
                 "This MCP server was installed from an extension.",
             )
         } else {
@@ -611,25 +600,7 @@ impl AgentConfiguration {
                                     })
                                     .unwrap_or(false);
 
-                                let uninstall_extension_task = match (
-                                    is_provided_by_extension,
-                                    resolve_extension_for_context_server(&context_server_id, cx),
-                                ) {
-                                    (true, Some((id, manifest))) => {
-                                        if extension_only_provides_context_server(manifest.as_ref())
-                                        {
-                                            ExtensionStore::global(cx).update(cx, |store, cx| {
-                                                store.uninstall_extension(id, cx)
-                                            })
-                                        } else {
-                                            workspace.update(cx, |workspace, cx| {
-                                                show_unable_to_uninstall_extension_with_context_server(workspace, context_server_id.clone(), cx);
-                                            }).log_err();
-                                            Task::ready(Ok(()))
-                                        }
-                                    }
-                                    _ => Task::ready(Ok(())),
-                                };
+                                let uninstall_extension_task = Task::ready(Ok(()));
 
                                 cx.spawn({
                                     let fs = fs.clone();
@@ -907,29 +878,11 @@ impl Render for AgentConfiguration {
     }
 }
 
-fn extension_only_provides_context_server(manifest: &ExtensionManifest) -> bool {
-    manifest.context_servers.len() == 1
-        && manifest.themes.is_empty()
-        && manifest.icon_themes.is_empty()
-        && manifest.languages.is_empty()
-        && manifest.grammars.is_empty()
-        && manifest.language_servers.is_empty()
-        && manifest.slash_commands.is_empty()
-        && manifest.indexed_docs_providers.is_empty()
-        && manifest.snippets.is_none()
-        && manifest.debug_locators.is_empty()
-}
-
 pub(crate) fn resolve_extension_for_context_server(
-    id: &ContextServerId,
-    cx: &App,
-) -> Option<(Arc<str>, Arc<ExtensionManifest>)> {
-    ExtensionStore::global(cx)
-        .read(cx)
-        .installed_extensions()
-        .iter()
-        .find(|(_, entry)| entry.manifest.context_servers.contains_key(&id.0))
-        .map(|(id, entry)| (id.clone(), entry.manifest.clone()))
+    _id: &ContextServerId,
+    _cx: &App,
+) -> Option<(Arc<str>, Arc<std::any::Any>)> {
+    None
 }
 
 // This notification appears when trying to delete

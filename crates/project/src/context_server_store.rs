@@ -1,4 +1,3 @@
-pub mod extension;
 pub mod registry;
 
 use std::{path::Path, sync::Arc};
@@ -17,9 +16,7 @@ use crate::{
     worktree_store::WorktreeStore,
 };
 
-pub fn init(cx: &mut App) {
-    extension::init(cx);
-}
+pub fn init(_cx: &mut App) {}
 
 actions!(context_server, [Restart]);
 
@@ -1238,7 +1235,7 @@ mod tests {
             &self,
             _worktree_store: Entity<WorktreeStore>,
             _cx: &AsyncApp,
-        ) -> Task<Result<Option<::extension::ContextServerConfiguration>>> {
+        ) -> Task<Result<Option<context_server::ContextServerConfiguration>>> {
             Task::ready(Ok(None))
         }
     }

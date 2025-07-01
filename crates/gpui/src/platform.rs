@@ -28,16 +28,23 @@ mod windows;
     any(target_os = "linux", target_os = "freebsd"),
     any(feature = "wayland", feature = "x11"),
 ))]
-pub(crate) mod scap_screen_capture;
+// pub(crate) mod scap_screen_capture; // Removed with call functionality
 
-use crate::{
-    Action, AnyWindowHandle, App, AsyncWindowContext, BackgroundExecutor, Bounds,
-    DEFAULT_WINDOW_SIZE, DevicePixels, DispatchEventResult, Font, FontId, FontMetrics, FontRun,
-    ForegroundExecutor, GlyphId, GpuSpecs, ImageSource, Keymap, LineLayout, Pixels, PlatformInput,
-    Point, RenderGlyphParams, RenderImage, RenderImageParams, RenderSvgParams, ScaledPixels, Scene,
-    ShapedGlyph, ShapedRun, SharedString, Size, SvgRenderer, SvgSize, Task, TaskLabel, Window,
-    WindowControlArea, hash, point, px, size,
-};
+use crate::Action;
+use crate::app::{App, AsyncWindowContext};
+use crate::asset_cache::hash;
+use crate::assets::{RenderImage, RenderImageParams};
+use crate::elements::ImageSource;
+use crate::executor::{BackgroundExecutor, ForegroundExecutor, Task, TaskLabel};
+use crate::geometry::{Bounds, DevicePixels, Pixels, Point, ScaledPixels, Size, point, px, size};
+use crate::interactive::PlatformInput;
+use crate::keymap::Keymap;
+use crate::scene::Scene;
+use crate::shared_string::SharedString;
+use crate::svg_renderer::{RenderSvgParams, SvgRenderer, SvgSize};
+use crate::text_system::{Font, FontId, FontMetrics, FontRun, GlyphId, LineLayout, RenderGlyphParams, ShapedGlyph, ShapedRun};
+use crate::window::{AnyWindowHandle, Window, WindowControlArea, DEFAULT_WINDOW_SIZE, DispatchEventResult};
+use crate::GpuSpecs;
 use anyhow::Result;
 use async_task::Runnable;
 use futures::channel::oneshot;
@@ -222,9 +229,9 @@ pub(crate) trait Platform: 'static {
     ) -> Vec<SmallVec<[PathBuf; 2]>> {
         Vec::new()
     }
-    fn on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn Action)>);
+    fn on_app_menu_action(&self, callback: Box<dyn FnMut(&dyn crate::Action)>);
     fn on_will_open_app_menu(&self, callback: Box<dyn FnMut()>);
-    fn on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn Action) -> bool>);
+    fn on_validate_app_menu_command(&self, callback: Box<dyn FnMut(&dyn crate::Action) -> bool>);
     fn keyboard_layout(&self) -> Box<dyn PlatformKeyboardLayout>;
 
     fn compositor_name(&self) -> &'static str {
